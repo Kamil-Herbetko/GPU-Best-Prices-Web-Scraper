@@ -1,13 +1,19 @@
 from bs4 import BeautifulSoup
-import grequests
+import httpx
+import asyncio
 
-html = grequests.get("https://www.amazon.pl/s?k=rtx+3080&rh=n%3A20788256031%2Cn%3A20788599031&dc&__mk_pl_PL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&qid=1638022020&rnid=20876086031&ref=sr_nr_n_2")
-text = grequests.map([html])[0].text
 
-soup = BeautifulSoup(text, "lxml")
+async def main():
+    product = input("What do you want to search for?\n")
+    url = f"https://www.x-kom.pl/szukaj?q={product}".replace(" ", "%20")
+    html = httpx.get(url, headers={'user-agent': 'product-web-scraper'})
 
-list_of_prices = soup.find_all("span", class_="a-offscreen")
+    soup = BeautifulSoup(html, "lxml")
+    num_of_pages = int(soup.find_all(class_="sc-1h16fat-0 sc-1xy3kzh-0 eqFjDt")[-1].text)
 
-for price in list_of_prices:
-    print(price.text)
+    async with httpx.AsyncClient() as client:
+        pages_html = (client.get(f"{url}&{page}&sort_by=accuracy_desc") for page in range(1, num_of_pages + 1))
+        reqs = await asyncio.gather(*pages_html)
 
+if __name__ == "__main__":
+    asyncio.run(main())
