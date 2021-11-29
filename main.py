@@ -12,8 +12,17 @@ async def main():
     num_of_pages = int(soup.find_all(class_="sc-1h16fat-0 sc-1xy3kzh-0 eqFjDt")[-1].text)
 
     async with httpx.AsyncClient() as client:
-        pages_html = (client.get(f"{url}&{page}&sort_by=accuracy_desc") for page in range(1, num_of_pages + 1))
+        pages_html = (client.get(f"{url}&page={page}&sort_by=accuracy_desc") for page in range(1, num_of_pages + 1))
+
         reqs = await asyncio.gather(*pages_html)
+
+    htmls = [req.text for req in reqs]
+
+    for html in htmls:
+        soup = BeautifulSoup(html, "lxml")
+        for product in soup.find_all(class_="sc-1yu46qn-9 klYVjF sc-16zrtke-0 cDhuES"):
+            title = product["title"]
+            print(title)
 
 if __name__ == "__main__":
     asyncio.run(main())
