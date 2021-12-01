@@ -22,6 +22,10 @@ async def main():
         soup = BeautifulSoup(html, "lxml")
         for product in soup.find_all(class_="sc-1yu46qn-9 klYVjF sc-16zrtke-0 cDhuES"):
             title = product["title"]
+            product_name = next(product.children).text
+            category = title[0 : len(title) - len(product_name)]
+            print(category)
+            print(product_name)
             print(title)
 
 if __name__ == "__main__":
