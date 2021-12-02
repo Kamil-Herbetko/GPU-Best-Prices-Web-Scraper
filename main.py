@@ -4,8 +4,8 @@ import asyncio
 
 
 async def main():
-    product = input("What do you want to search for?\n")
-    url = f"https://www.x-kom.pl/szukaj?q={product}".replace(" ", "%20")
+    search = input("What do you want to search for?\n")
+    url = f"https://www.x-kom.pl/szukaj?q={search}".replace(" ", "%20")
     html = httpx.get(url, headers={'user-agent': 'product-web-scraper'})
 
     soup = BeautifulSoup(html, "lxml")
@@ -23,10 +23,14 @@ async def main():
         for product in soup.find_all(class_="sc-1yu46qn-9 klYVjF sc-16zrtke-0 cDhuES"):
             title = product["title"]
             product_name = next(product.children).text
-            category = title[0 : len(title) - len(product_name)]
-            print(category)
-            print(product_name)
-            print(title)
+            category = title[0: len(title) - len(product_name)]
+            link = f"https://www.x-kom.pl{product.parent['href']}"
+            specs_div = product.parent.parent.parent.next_sibling
+            print(product)
+            print(link)
+            #print(category)
+            #print(product_name)
+            #print(title)
 
 if __name__ == "__main__":
     asyncio.run(main())
